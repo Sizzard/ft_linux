@@ -2,6 +2,11 @@
 
 
 # CREATE 3 PARTITIONS ROOT BOOT AND SWAP
+# SETUP WITH lsblk fdisk and cfdisk
+# SET sdb1 AS BIOS BOOT         # BOOT
+# mkfs -v -t ext4 /dev/sdb2     # ROOT
+# mkswap /dev/sdb3              # SWAP
+
 
 apt upgrade -y
 apt install git -y
@@ -12,10 +17,17 @@ apt install texinfo -y
 rm -rf /bin/sh
 ln -s /bin/bash /bin/sh
 
+rm -rf /usr/bin/awk
+ln -s /usr/bin/gawk /usr/bin/awk
+
+rm -rf /usr/bin/yacc
+ln -s /usr/bin/bison /usr/bin/yacc
+
 echo "export LFS=/mnt/lfs; umask 022" >> /root/.bashrc
 
 mkdir -pv $LFS
-mount -v -t ext4 /dev/sdb1 $LFS
+mount -v -t ext4 /dev/sdb3 $LFS
+swapon -v /dev/sdb2 
 chown root:root $LFS
 chmod 755 $LFS
 
@@ -57,6 +69,8 @@ esac
 
 [ ! -e /etc/bash.bashrc ] || mv -v /etc/bash.bashrc /etc/bash.bashrc.NOUSE
 
+######################################## su - lfs
+
 su - lfs
 
 cat > ~/.bash_profile << "EOF"
@@ -76,9 +90,11 @@ CONFIG_SITE=$LFS/usr/share/config.site
 export LFS LC_ALL LFS_TGT PATH CONFIG_SITE
 EOF
 
-# SU EN ROOT
-# [ ! -e /etc/bash.bashrc ] || mv -v /etc/bash.bashrc /etc/bash.bashrc.NOUSE
+######################################### su
+
+[ ! -e /etc/bash.bashrc ] || mv -v /etc/bash.bashrc /etc/bash.bashrc.NOUSE
 
 cat >> ~/.bashrc << "EOF"
 export MAKEFLAGS=-j$(nproc)
 EOF
+
